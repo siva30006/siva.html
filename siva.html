@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Fetch Latest Code') {
+            steps {
+                echo 'Cloning repository from GitHub...'
+                // Clean workspace and pull the latest code
+                sh 'rm -rf *'
+                git branch: 'main', url: 'https://github.com/pradeeprpin/ciet.git'
+            }
+        }
+
+        stage('Deploy to Nginx') {
+            steps {
+                echo 'Deploying index.html to Nginx web root...'
+
+                // Remove old file (if exists)
+                sh 'sudo rm -f /var/www/html/index.html'
+
+                // Copy new index.html from repo to Nginx location
+                sh 'sudo cp pradeep.html /var/www/html/'
+
+                // Restart Nginx to reflect changes (optional)
+                sh 'sudo systemctl restart nginx'
+
+                echo 'Deployment successful — latest index.html updated in /var/www/html/'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Deployment failed. Please check the Jenkins logs.'
+        }
+    }
+    }
